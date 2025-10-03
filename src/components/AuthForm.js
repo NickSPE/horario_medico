@@ -84,8 +84,7 @@ const AuthForm = ({ type = 'login' }) => {
             }
 
             toast.error(errorMessage)
-        }
-        finally {
+        } finally {
             setLoading(false)
         }
     }

@@ -17,122 +17,120 @@ export const AuthProvider = ({ children }) => {
     const [userProfile, setUserProfile] = useState(null)
     const [loading, setLoading] = useState(true)
 
-    useEffect(() => {
-        let isMounted = true
+    // Función helper para cargar perfil (sin loops)
+    const loadProfile = async (userId, userEmail = '') => {
+        try {
+            console.log('🔍 Cargando perfil para:', userId)
 
-        const fetchUserProfile = async (userId, userEmail = '') => {
-            try {
-                console.log('🔍 Buscando perfil para usuario:', userId)
+            const { data, error } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', userId)
+                .maybeSingle() // Usar maybeSingle en lugar de single para evitar errores
 
-                const { data, error } = await supabase
+            if (error) {
+                console.error('❌ Error obteniendo perfil:', error)
+                setUserProfile(null)
+                return
+            }
+
+            if (!data) {
+                // No existe perfil, crear uno
+                console.log('🔄 Creando perfil...')
+                const { data: newProfile, error: createError } = await supabase
                     .from('profiles')
-                    .select('*')
-                    .eq('id', userId)
+                    .insert([{
+                        id: userId,
+                        email: userEmail,
+                        full_name: '',
+                        role: 'patient'
+                    }])
+                    .select()
                     .single()
 
+                if (createError) {
+                    console.error('❌ Error creando perfil:', createError)
+                    setUserProfile(null)
+                } else {
+                    console.log('✅ Perfil creado:', newProfile)
+                    setUserProfile(newProfile)
+                }
+            } else {
+                console.log('✅ Perfil encontrado:', data)
+                setUserProfile(data)
+            }
+        } catch (err) {
+            console.error('❌ Error general cargando perfil:', err)
+            setUserProfile(null)
+        }
+    }
+
+    useEffect(() => {
+        let mounted = true
+
+        const initAuth = async () => {
+            try {
+                // Obtener sesión actual
+                const { data: { session }, error } = await supabase.auth.getSession()
+                
                 if (error) {
-                    console.log('ℹ️ Error o no se encontró perfil:', error.message)
-
-                    // Si no existe el perfil, intentar crearlo
-                    if (error.code === 'PGRST116') {
-                        console.log('🔄 Creando perfil básico...')
-                        const { data: newProfile, error: createError } = await supabase
-                            .from('profiles')
-                            .insert([
-                                {
-                                    id: userId,
-                                    email: userEmail,
-                                    full_name: '',
-                                    role: 'patient'
-                                }
-                            ])
-                            .select()
-                            .single()
-
-                        if (createError) {
-                            console.error('❌ Error creando perfil:', createError)
-                            if (isMounted) setUserProfile(null)
-                            return
-                        }
-
-                        console.log('✅ Perfil creado:', newProfile)
-                        if (isMounted) setUserProfile(newProfile)
-                        return
-                    }
-
-                    if (isMounted) setUserProfile(null)
+                    console.error('Error obteniendo sesión:', error)
                     return
                 }
 
-                console.log('✅ Perfil obtenido:', data)
-                if (isMounted) setUserProfile(data)
-            } catch (error) {
-                console.error('❌ Error general fetchUserProfile:', error)
-                if (isMounted) setUserProfile(null)
-            }
-        }
-
-        const getInitialSession = async () => {
-            try {
-                const { data: { session } } = await supabase.auth.getSession()
-
-                if (!isMounted) return
-
-                setUser(session?.user || null)
+                if (!mounted) return
 
                 if (session?.user) {
-                    await fetchUserProfile(session.user.id, session.user.email)
+                    setUser(session.user)
+                    await loadProfile(session.user.id, session.user.email)
+                } else {
+                    setUser(null)
+                    setUserProfile(null)
                 }
-            } catch (error) {
-                console.error('Error obteniendo sesión inicial:', error)
+            } catch (err) {
+                console.error('Error inicializando auth:', err)
             } finally {
-                if (isMounted) {
-                    setLoading(false)
-                }
+                if (mounted) setLoading(false)
             }
         }
 
-        getInitialSession()
+        initAuth()
 
         // Escuchar cambios de autenticación
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                if (!isMounted) return
+                if (!mounted) return
 
-                console.log('🔄 Auth state change:', event)
-                setUser(session?.user || null)
-
+                console.log('🔄 Auth event:', event)
+                
                 if (session?.user) {
-                    await fetchUserProfile(session.user.id, session.user.email)
+                    setUser(session.user)
+                    // Solo cargar perfil en eventos importantes
+                    if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+                        await loadProfile(session.user.id, session.user.email)
+                    }
                 } else {
+                    setUser(null)
                     setUserProfile(null)
                 }
-
-                setLoading(false)
+                
+                if (mounted) setLoading(false)
             }
         )
 
         return () => {
-            isMounted = false
+            mounted = false
             subscription.unsubscribe()
         }
-    }, []) // Sin dependencias para evitar loops
+    }, [])
 
     const signUp = async (email, password, userData) => {
         try {
-            console.log('🚀 Iniciando registro ultra simple con:', { email, userData })
-
             const { data, error } = await ultraSimpleSignUp(email, password, userData)
-
-            if (error) {
-                console.error('❌ Error en signUp:', error)
-                throw error
-            }
-
-            console.log('✅ Usuario registrado/logueado exitosamente:', data)
+            if (error) throw error
             return { data, error: null }
         } catch (error) {
-            console.error('❌ Error general en signUp:', error)
+            console.error('❌ Error en signUp:', error)
             throw error
         }
     }
