@@ -17,27 +17,30 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className={inter.variable}>
-      <body className="font-sans antialiased min-h-screen bg-gradient-to-br from-surface-50 to-surface-100 dark:from-surface-950 dark:to-surface-900 text-surface-900 dark:text-surface-100">
+
+      {/*HEADER */}
+
+      <body className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text)', fontFamily: 'var(--font-sans)' }}>
         <AuthProvider>
-          <div className="container-responsive">
+          <div className="container">
             {children}
           </div>
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
-              className: 'notification-enter',
               style: {
-                background: 'light-dark(var(--color-surface-50), var(--color-surface-900))',
-                color: 'light-dark(var(--color-surface-900), var(--color-surface-100))',
-                border: '1px solid light-dark(var(--color-surface-200), var(--color-surface-800))',
-                borderRadius: 'var(--radius-lg)',
-                boxShadow: 'var(--shadow-lg)',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-md)',
                 fontFamily: 'var(--font-sans)',
               },
             }}
           />
         </AuthProvider>
+
       </body>
     </html>
   );
