@@ -1,0 +1,70 @@
+/* Scoped styles for forms (CSS Module) */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formCard {
+  width: min(92vw, 480px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: clamp(1rem, 3vw, 2rem);
+  animation: fadeInUp 380ms ease-out both;
+}
+
+.title {
+  margin: 0;
+  font-weight: 800;
+  line-height: 1.05;
+  font-size: clamp(1.35rem, 3.6vw, 1.85rem);
+}
+
+.subtitle {
+  color: var(--color-text-secondary);
+  margin-top: 0.35rem;
+  font-size: clamp(0.95rem, 2.4vw, 1.05rem);
+}
+
+.input {
+  transition: border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+.input:focus {
+  transform: translateY(-1px);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px rgba(64, 224, 208, 0.15);
+}
+
+.submit {
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+
+.submit:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.submit:active {
+  transform: translateY(0);
+}
+
+.section {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Small helper for choice cards alignment */
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
