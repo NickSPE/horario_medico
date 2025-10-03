@@ -1,5 +1,5 @@
 'use client'
-import { supabase } from '@/lib/supabase'
+import { supabase, ultraSimpleSignUp } from '@/lib/supabase'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext({})
@@ -18,15 +18,78 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Obtener sesión inicial
-        const getInitialSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            setUser(session?.user || null)
+        let isMounted = true
 
-            if (session?.user) {
-                await fetchUserProfile(session.user.id)
+        const fetchUserProfile = async (userId, userEmail = '') => {
+            try {
+                console.log('🔍 Buscando perfil para usuario:', userId)
+
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single()
+
+                if (error) {
+                    console.log('ℹ️ Error o no se encontró perfil:', error.message)
+
+                    // Si no existe el perfil, intentar crearlo
+                    if (error.code === 'PGRST116') {
+                        console.log('🔄 Creando perfil básico...')
+                        const { data: newProfile, error: createError } = await supabase
+                            .from('profiles')
+                            .insert([
+                                {
+                                    id: userId,
+                                    email: userEmail,
+                                    full_name: '',
+                                    role: 'patient'
+                                }
+                            ])
+                            .select()
+                            .single()
+
+                        if (createError) {
+                            console.error('❌ Error creando perfil:', createError)
+                            if (isMounted) setUserProfile(null)
+                            return
+                        }
+
+                        console.log('✅ Perfil creado:', newProfile)
+                        if (isMounted) setUserProfile(newProfile)
+                        return
+                    }
+
+                    if (isMounted) setUserProfile(null)
+                    return
+                }
+
+                console.log('✅ Perfil obtenido:', data)
+                if (isMounted) setUserProfile(data)
+            } catch (error) {
+                console.error('❌ Error general fetchUserProfile:', error)
+                if (isMounted) setUserProfile(null)
             }
-            setLoading(false)
+        }
+
+        const getInitialSession = async () => {
+            try {
+                const { data: { session } } = await supabase.auth.getSession()
+
+                if (!isMounted) return
+
+                setUser(session?.user || null)
+
+                if (session?.user) {
+                    await fetchUserProfile(session.user.id, session.user.email)
+                }
+            } catch (error) {
+                console.error('Error obteniendo sesión inicial:', error)
+            } finally {
+                if (isMounted) {
+                    setLoading(false)
+                }
+            }
         }
 
         getInitialSession()
@@ -34,73 +97,43 @@ export const AuthProvider = ({ children }) => {
         // Escuchar cambios de autenticación
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
+                if (!isMounted) return
+
+                console.log('🔄 Auth state change:', event)
                 setUser(session?.user || null)
 
                 if (session?.user) {
-                    await fetchUserProfile(session.user.id)
+                    await fetchUserProfile(session.user.id, session.user.email)
                 } else {
                     setUserProfile(null)
                 }
+
                 setLoading(false)
             }
         )
 
-        return () => subscription.unsubscribe()
-    }, [])
-
-    const fetchUserProfile = async (userId) => {
-        try {
-            const { data, error } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single()
-
-            if (error && error.code !== 'PGRST116') {
-                console.error('Error fetching profile:', error)
-                return
-            }
-
-            setUserProfile(data)
-        } catch (error) {
-            console.error('Error fetching profile:', error)
+        return () => {
+            isMounted = false
+            subscription.unsubscribe()
         }
-    }
+    }, []) // Sin dependencias para evitar loops
 
     const signUp = async (email, password, userData) => {
         try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: userData
-                }
-            })
+            console.log('🚀 Iniciando registro ultra simple con:', { email, userData })
 
-            if (error) throw error
+            const { data, error } = await ultraSimpleSignUp(email, password, userData)
 
-            // Crear perfil del usuario
-            if (data.user) {
-                const { error: profileError } = await supabase
-                    .from('profiles')
-                    .insert([
-                        {
-                            id: data.user.id,
-                            email: data.user.email,
-                            full_name: userData.full_name,
-                            role: userData.role,
-                            created_at: new Date().toISOString()
-                        }
-                    ])
-
-                if (profileError) {
-                    console.error('Error creating profile:', profileError)
-                }
+            if (error) {
+                console.error('❌ Error en signUp:', error)
+                throw error
             }
 
-            return { data, error }
+            console.log('✅ Usuario registrado/logueado exitosamente:', data)
+            return { data, error: null }
         } catch (error) {
-            return { data: null, error }
+            console.error('❌ Error general en signUp:', error)
+            throw error
         }
     }
 
@@ -131,8 +164,7 @@ export const AuthProvider = ({ children }) => {
         loading,
         signUp,
         signIn,
-        signOut,
-        fetchUserProfile
+        signOut
     }
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

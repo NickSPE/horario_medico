@@ -1,7 +1,6 @@
 'use client'
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useAuth } from '@/contexts/AuthContext'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import Footer from './components/footer'
@@ -28,7 +27,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className='flex flex-col min-h-screen'>
 
       {/* Header */}
       <Header />
@@ -43,25 +42,11 @@ export default function HomePage() {
             <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
               Gestiona medicamentos, recetas y consultas médicas en una plataforma segura y fácil de usar.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="/auth/register"
-                className="btn btn-primary"
-              >
-                Comenzar Ahora
-              </Link>
-              <Link
-                href="/auth/login"
-                className="btn btn-secondary"
-              >
-                Iniciar Sesión
-              </Link>
-            </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
+        <section id="features" className="py-10" style={{ backgroundColor: 'var(--color-surface-secondary)' }}>
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-center mb-12">Características principales</h2>
             <div className="grid md:grid-cols-3 gap-8">
