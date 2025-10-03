@@ -5,7 +5,7 @@ export default function Header() {
 
         <header className="header-app">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-16">
+                <div className="flex items-center justify-between h-16 relative">
                     <div className="flex items-center gap-3">
                         <svg
                             className="h-8 w-8"
@@ -30,7 +30,8 @@ export default function Header() {
                         </svg>
                         <h1 className="text-xl font-bold">Horario Medico</h1>
                     </div>
-                    <nav className="hidden md:flex items-center gap-8">
+                    {/* Nav centrado en desktop, oculto en móvil */}
+                    <nav className="hidden md:flex items-center gap-4 sm:gap-8 md:absolute md:left-1/2 md:-translate-x-1/2">
                         <a className="nav-link" href="#features">
                             Servicios
                         </a>

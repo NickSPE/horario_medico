@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import styles from './forms.module.css'
 
 const AuthForm = ({ type = 'login' }) => {
     const [formData, setFormData] = useState({
@@ -154,12 +155,12 @@ const AuthForm = ({ type = 'login' }) => {
 
             {/* Main Content */}
             <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <div className="w-full max-w-md space-y-8">
+                <div className={styles.formCard}>
                     <div className="text-center">
-                        <h2 className="text-3xl font-bold">
+                        <h2 className={styles.title}>
                             {type === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
                         </h2>
-                        <p className="mt-3" style={{ color: 'var(--color-text-secondary)' }}>
+                        <p className={styles.subtitle}>
                             {type === 'login'
                                 ? 'Accede a tu cuenta para gestionar tus medicamentos'
                                 : 'Crea tu cuenta para comenzar a gestionar tus medicamentos'
@@ -168,14 +169,14 @@ const AuthForm = ({ type = 'login' }) => {
                     </div>
 
                     <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-                        <div className="space-y-4">
+                        <div className={styles.section}>
                             {type === 'register' && (
                                 <div className="form-group">
                                     <label className="label" htmlFor="fullName">
                                         Nombre completo
                                     </label>
                                     <input
-                                        className="input"
+                                        className={`input ${styles.input}`}
                                         id="fullName"
                                         name="fullName"
                                         placeholder="Juan Pérez"
@@ -193,7 +194,7 @@ const AuthForm = ({ type = 'login' }) => {
                                 </label>
                                 <input
                                     autoComplete="email"
-                                    className="input"
+                                    className={`input ${styles.input}`}
                                     id="email"
                                     name="email"
                                     placeholder="tu@email.com"
@@ -210,7 +211,7 @@ const AuthForm = ({ type = 'login' }) => {
                                 </label>
                                 <input
                                     autoComplete={type === 'login' ? 'current-password' : 'new-password'}
-                                    className="input"
+                                    className={`input ${styles.input}`}
                                     id="password"
                                     name="password"
                                     placeholder="••••••••"
@@ -226,7 +227,7 @@ const AuthForm = ({ type = 'login' }) => {
                                     <span className="label">
                                         Tipo de cuenta
                                     </span>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className={styles.optionsGrid}>
                                         <label className="card cursor-pointer p-4 text-center">
                                             <input
                                                 className="sr-only"
@@ -258,7 +259,7 @@ const AuthForm = ({ type = 'login' }) => {
 
                         <div>
                             <button
-                                className="btn btn-primary w-full"
+                                className={`btn btn-primary w-full ${styles.submit}`}
                                 disabled={loading}
                                 type="submit"
                             >

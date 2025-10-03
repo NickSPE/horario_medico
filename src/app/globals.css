@@ -84,6 +84,19 @@ body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* prevent horizontal scroll from full-bleed sections */
+}
+
+/* Ensure the app root and body allow vertical scrolling when content is taller than the viewport */
+#__next,
+html,
+body {
+  height: auto;
+  min-height: 100%;
+}
+
+body {
+  overflow-y: auto;
 }
 
 /* Componentes base */
@@ -163,17 +176,135 @@ body {
 }
 
 /* Cards */
-.card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
+.hero {
+  /* Make background responsive using viewport units, no fixed pixels */
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-radius: var(--radius-lg) !important;
+  /* allow internal scrolling on small screens when content overflows */
+  overflow: auto;
+  /* make the hero break out of centered containers and be full-bleed */
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  /* set height relative to viewport minus header height (header h-16 = 4rem) */
+  height: calc(100vh - 4rem);
+  max-height: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+/* Inner card inside hero to keep rounded corners and readable text */
+.hero-inner {
+  width: min(92%, 1200px);
+  background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.38));
+  padding: 2rem;
+  border-radius: calc(var(--radius-lg) + 0.5rem);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.4);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+  text-align: center;
+}
+
+/* Responsive hero typography */
+.hero-title {
+  font-weight: 800;
+  line-height: 1.02;
+  /* clamp(min, preferred, max) */
+  font-size: clamp(1.6rem, 4.5vw, 3.5rem);
+  margin: 0;
+}
+
+.hero-sub {
+  color: rgba(255,255,255,0.9);
+  font-size: clamp(0.95rem, 2.4vw, 1.25rem);
+  max-width: 58ch;
+}
+
+.hero-buttons {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hero-buttons .btn {
+  /* Use flexible percentage-based sizing for responsiveness (no px) */
+  flex: 1 1 40%;
+  max-width: 40%;
+  min-width: 20%;
+}
+
+/* Make header stay above hero */
+header {
+  position: relative;
+  z-index: 60;
+}
+
+/* Make the header full-bleed across the viewport while keeping its inner container centered */
+.header-app {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  left: 0;
+  right: 0;
+  top: 0;
+  background: transparent; /* keep transparent by default; change if you want a background color */
+  z-index: 70;
+}
+
+/* Make header inner container truly full-width (override generic .container) */
+.header-app {
+  max-width: 100% !important;
+  padding-left: 0.75rem; /* small safe padding */
+  padding-right: 0.75rem;
+}
+
+
+/* Mobile adjustments for hero to avoid oversized image and to stack buttons */
+@media (max-width: 640px) {
+  .hero {
+    /* use a smaller viewport fraction on phones */
+    /* let the image be fully visible: use contain so it doesn't crop on small screens */
+    background-size: contain !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    /* allow the hero to size with viewport height but not be excessively tall */
+    height: 55vh;
+    max-height: 70vh;
+    padding: 1rem;
+  }
+
+  .hero-inner {
+    width: 96%;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+  }
+
+  .hero-title {
+    font-size: clamp(1.25rem, 7vw, 2rem);
+  }
+
+  .hero-sub {
+    font-size: clamp(0.9rem, 3.6vw, 1rem);
+  }
+
+  .hero-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-buttons .btn {
+    width: 100%;
+    max-width: none;
+    flex-basis: auto;
+  }
 }
 
 .card-header {
@@ -218,6 +349,27 @@ body {
 .nav-link.active {
   color: var(--color-primary);
   background-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Header nav responsive tweaks */
+.header-app .nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+@media (max-width: 480px) {
+  .header-app .nav {
+    gap: 0.25rem;
+  }
+  .header-app .nav .nav-link {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.9rem;
+  }
+  .header-app .container > .flex {
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
 }
 
 /* Forms */
@@ -269,12 +421,6 @@ body {
   color: var(--color-primary);
 }
 
-/* Layout */
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
 
 .header {
   position: sticky;
@@ -289,6 +435,19 @@ body {
 
 .section {
   margin-bottom: 2rem;
+}
+
+/* Hero image helper: make background image cover the element, center it and keep rounded corners */
+.hero {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  min-height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Utilities */

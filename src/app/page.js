@@ -1,4 +1,4 @@
-'use client'
+"use client"
 import LoadingSpinner from '@/components/LoadingSpinner'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
@@ -12,19 +12,13 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!loading && user && userProfile) {
-      // Redirigir al dashboard según el rol
       const dashboardPath = userProfile.role === 'doctor' ? '/dashboard/doctor' : '/dashboard/patient'
       router.push(dashboardPath)
     }
   }, [user, userProfile, loading, router])
 
-  if (loading) {
-    return <LoadingSpinner />
-  }
-
-  if (user) {
-    return <LoadingSpinner />
-  }
+  if (loading) return <LoadingSpinner />
+  if (user) return <LoadingSpinner />
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -86,24 +80,19 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* About Section */}
-        <section id="about" className="py-20">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-3xl font-bold mb-6">Acerca de MedControl</h2>
-            <p className="text-lg max-w-3xl mx-auto" style={{ color: 'var(--color-text-secondary)' }}>
-              MedControl es una plataforma diseñada para facilitar la gestión de medicamentos y
-              mejorar la comunicación entre doctores y pacientes. Nuestro objetivo es hacer que
-              el seguimiento de tratamientos médicos sea más seguro, eficiente y accesible para todos.
-            </p>
+      <main className="px-10 py-12">
+        <div className="@container">
+          <div className="@[480px]:p-4">
+            {/* Main content goes here (kept empty for now) */}
           </div>
-        </section>
+        </div>
       </main>
-      <Footer />
 
-    </div>
+      <Footer />
+    </>
   )
 }
-
-
+ 

@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import styles from "@/components/forms.module.css";
 
 
 export default function FormHome() {
@@ -13,40 +14,42 @@ export default function FormHome() {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 w-full max-w-md">
-            <div>
-                <label htmlFor="username">Username</label>
-                <input
-                    type="text"
-                    id="username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="border p-2"
-                />
-            </div>
-            <div>
-                <label htmlFor="email">Email</label>
-                <input
-                    type="email"
-                    id="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="border p-2"
-                />
-            </div>
-            <div>
-                <label htmlFor="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="border p-2"
-                />
-            </div>
-            <button type="submit" className="bg-blue-500 text-white p-2">
-                Submit
-            </button>
-        </form>
+        <div className={styles.formCard}>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                    <label className="label" htmlFor="username">Usuario</label>
+                    <input
+                        type="text"
+                        id="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        className={`input ${styles.input}`}
+                    />
+                </div>
+                <div>
+                    <label className="label" htmlFor="email">Email</label>
+                    <input
+                        type="email"
+                        id="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`input ${styles.input}`}
+                    />
+                </div>
+                <div>
+                    <label className="label" htmlFor="password">Contraseña</label>
+                    <input
+                        type="password"
+                        id="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className={`input ${styles.input}`}
+                    />
+                </div>
+                <button type="submit" className={`btn btn-primary w-full ${styles.submit}`}>
+                    Enviar
+                </button>
+            </form>
+        </div>
     );
 }
