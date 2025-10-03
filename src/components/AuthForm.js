@@ -31,19 +31,60 @@ const AuthForm = ({ type = 'login' }) => {
 
         try {
             if (type === 'login') {
-                await signIn(formData.email, formData.password)
+                const { error } = await signIn(formData.email, formData.password)
+                if (error) throw error
+
                 toast.success('¡Bienvenido!')
+                router.push('/dashboard')
             } else {
                 if (!formData.fullName.trim()) {
                     toast.error('El nombre completo es requerido')
                     return
                 }
-                await signUp(formData.email, formData.password, formData.fullName, formData.role)
-                toast.success('¡Cuenta creada exitosamente!')
+
+                const { error } = await signUp(formData.email, formData.password, {
+                    full_name: formData.fullName,
+                    role: formData.role
+                })
+
+                if (error) throw error
+
+                toast.success('¡Cuenta creada exitosamente! Puedes acceder inmediatamente.')
+                router.push('/dashboard')
             }
         } catch (error) {
             console.error('Error de autenticación:', error)
-            toast.error(error.message || 'Error en la autenticación')
+
+            // Manejar errores de forma simple
+            let errorMessage = 'Error en la autenticación'
+
+            if (error.message?.includes('Invalid login credentials')) {
+                errorMessage = 'Email o contraseña incorrectos'
+            } else if (error.message?.includes('Email not confirmed')) {
+                errorMessage = 'Problema con la confirmación de email. Intentando solucionarlo...'
+                // En este caso, intentar hacer login directo
+                setTimeout(async () => {
+                    try {
+                        const { error: retryError } = await signIn(formData.email, formData.password)
+                        if (!retryError) {
+                            toast.success('¡Acceso exitoso!')
+                            router.push('/dashboard')
+                        }
+                    } catch (retryErr) {
+                        console.log('Retry failed:', retryErr)
+                    }
+                }, 1000)
+            } else if (error.message?.includes('User already registered')) {
+                errorMessage = 'Este email ya está registrado. Intenta iniciar sesión.'
+            } else if (error.message?.includes('Password should be at least')) {
+                errorMessage = 'La contraseña debe tener al menos 6 caracteres'
+            } else if (error.message?.includes('Invalid email')) {
+                errorMessage = 'Email inválido'
+            } else if (error.message) {
+                errorMessage = error.message
+            }
+
+            toast.error(errorMessage)
         } finally {
             setLoading(false)
         }
@@ -78,8 +119,9 @@ const AuthForm = ({ type = 'login' }) => {
                                 </defs>
                             </svg>
                             <div className='text-xl font-bold'>
-
-                                Horario Médico
+                                <Link href="/">
+                                    Horario Médico
+                                </Link>
                             </div>
                         </div>
                         <nav className="hidden md:flex items-center gap-8">
@@ -222,7 +264,10 @@ const AuthForm = ({ type = 'login' }) => {
                                 type="submit"
                             >
                                 {loading ? (
-                                    <div className="spinner"></div>
+                                    <div className="flex items-center justify-center gap-2">
+                                        <div className="spinner"></div>
+                                        <span>Procesando...</span>
+                                    </div>
                                 ) : (
                                     type === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'
                                 )}

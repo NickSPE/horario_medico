@@ -20,13 +20,12 @@ export default function RootLayout({ children }) {
 
       {/*HEADER */}
 
-      <body className="min-h-screen" style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text)', fontFamily: 'var(--font-sans)' }}>
+      <body style={{ backgroundColor: 'var(--color-background)', color: 'var(--color-text)', fontFamily: 'var(--font-sans)' }}>
         <AuthProvider>
           <div className="container">
             {children}
           </div>
           <Toaster
-            position="top-right"
             toastOptions={{
               duration: 4000,
               style: {

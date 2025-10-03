@@ -47,7 +47,7 @@ const Navigation = () => {
                                 </defs>
                             </svg>
                         </div>
-                        <h1 className="text-xl font-bold text-gradient">MedControl</h1>
+                        <h1 className="text-xl font-bold text-gradient">Horario Médico</h1>
                     </div>
 
                     <nav className="hidden md:flex items-center gap-8 fade-in stagger-1">
